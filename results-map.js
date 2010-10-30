@@ -36,8 +36,8 @@ var strings = {
   seeAllResults: 'See all results',
   newsLink: 'News',
   seats: 'seats',
-  ballot: 'Show Ballot',
-  showMap: 'Show Map',
+  ballot: 'Ballot Initiatives',
+  showMap: 'View Map',
   percentage: '%PERCENTAGE% of precincts reporting',
   yes: 'yes',
   no: 'no',
@@ -483,7 +483,7 @@ document.write(
                     '<span class="seeAllLink" id="news-link">',
                       'newsLink'.T(),
                     '</span>&nbsp;&nbsp;&nbsp;',
-                    '<span class="ballotInitiatives seeAllLink" id="ballot-initiatives">',
+                    '<span class="seeAllLink" id="ballot-initiatives">',
                     '</span>',
                   '</td>',
                   '<td>',
@@ -822,10 +822,6 @@ function checkBallotsData() {
   return ballotExist;
 }
 function showHideBallotsLink(state) {
-  if (state != 'us' && !checkBallotsData()) {
-    $('#ballot-initiatives').hide();
-    return;
-  }
   $('#ballot-initiatives').text(strings.ballot);
   $('#ballot-initiatives').show();
   $('#ballot-initiatives').click(showBallotInfo);
