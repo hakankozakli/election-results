@@ -1,5 +1,4 @@
 <messagebundle>
-    
     <msg name="returnToUSA">Return to USA</msg>
     <msg name="chooseLabel">Choose a state and select a race:</msg>
     <msg name="stateLabel">State:</msg>
@@ -8,6 +7,9 @@
     <msg name="president">President</msg>
     <msg name="house">U.S. House</msg>
     <msg name="senate">U.S. Senate</msg>
+    <msg name="governors">2010 - Governors</msg>
+    <msg name="house2010">2010 - U.S. House</msg>
+    <msg name="senate2010">2010 - U.S. Senate</msg>
     <msg name="others">Others - {{count}}</msg>
     <msg name="stateDistrict">{{state}} District {{number}}</msg>
     <msg name="undecided">{{undecided}} undecided</msg>
@@ -20,5 +22,7 @@
     <msg name="countdownHour">1 hour</msg>
     <msg name="countdownMinutes">{{minutes}} minutes</msg>
     <msg name="countdownMinute">1 minute</msg>
-    
+    <msg name="seeAllResults">See all results</msg>
+    <msg name="newsLink">News</msg>
+
 </messagebundle>

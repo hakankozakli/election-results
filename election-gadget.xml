@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Module>
-	
+
 <ModulePrefs
-	title="2008 Election Results from Google"
+	title="2010 Election Results from Google"
 	title_url="http://www.google.com/intl/en_us/2008election/"
 	description="View live election results for the 2008 US General Election."
 	category="politics"
@@ -20,9 +20,9 @@
 	
 	<Require feature="analytics"/>
 	
-	<Locale messages="http://general-election-2008.googlecode.com/svn/trunk/ALL_ALL.xml" />
-	<Locale lang="es" messages="http://general-election-2008.googlecode.com/svn/trunk/es_ALL.xml" />
-	<Locale lang="it" messages="http://general-election-2008.googlecode.com/svn/trunk/it_ALL.xml" />
+	<Locale messages="http://election-results.googlecode.com/svn/trunk/ALL_ALL.xml" />
+	<Locale lang="es" messages="http://election-results.googlecode.com/svn/trunk/es_ALL.xml" />
+	<Locale lang="it" messages="http://election-results.googlecode.com/svn/trunk/it_ALL.xml" />
 	
 </ModulePrefs>
 
@@ -82,10 +82,10 @@
 	<EnumValue value="wy" display_value="Wyoming"/>
 </UserPref>
 
-<UserPref name="race" default_value="President" datatype="enum" display_name="Race">
-	<EnumValue value="President" display_value="President"/>
-	<EnumValue value="U.S. House" display_value="U.S. House"/>
-	<EnumValue value="U.S. Senate" display_value="U.S. Senate"/>
+<UserPref name="race" default_value="U.S. House" datatype="enum" display_name="Race">
+ <EnumValue value="U.S. House" display_value="U.S. House"/>
+ <EnumValue value="U.S. Senate" display_value="U.S. Senate"/>
+ <EnumValue value="Governor" display_value="Governor"/>
 </UserPref>
 
 <UserPref name="countdown" default_value="true" datatype="bool" display_name="Countdown"/>
@@ -101,20 +101,21 @@
 
 <script type="text/javascript">
 	GoogleElectionMapOptions = {
+	  tpm: true,
 		_: null
 	};
-	
-	function script( url, seconds ) {
-		document.write(
-			'<script type="text/javascript" src="',
-				_IG_GetCachedUrl( url, { refreshInterval:seconds } ),
-			'">',
-			'<\/script>'
+
+  function script( url, seconds ) {
+    document.write(
+	  '<script type="text/javascript" src="',
+	    _IG_GetCachedUrl( url, { refreshInterval:seconds } ),
+        '">',
+	  '<\/script>'
 		);
 	}
-	
-	script( 'http://general-election-2008.googlecode.com/svn/trunk/polygonzo.js', 3600 );
-	script( 'http://general-election-2008.googlecode.com/svn/trunk/results-map.js', 180 );
+
+	script( 'http://election-results.googlecode.com/svn/trunk/polygonzo.js', 3600 );
+	script( 'http://election-results.googlecode.com/svn/trunk/results-map.js', 180 );
 </script>
 
 ]]>
