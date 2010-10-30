@@ -34,10 +34,17 @@ var strings = {
   noVotes: 'No votes reported',
   unopposed: 'Unopposed',
   seeAllResults: 'See all results',
-  newsLink: 'News'
+  newsLink: 'News',
+  seats: 'seats',
+  ballot: 'Show Ballot',
+  showMap: 'Show Map',
+  percentage: '%PERCENTAGE% of precincts reporting',
+  yes: 'yes',
+  no: 'no',
+  noData: 'No Ballot Initiatives Found'
 };
-
-var newsUrl = 'http://news.google.com/news/search';
+var isMapShown = true;
+var newsUrl = 'http://news.google.com/news/section';
 document.write(
   '<style type="text/css">',
     'html, body { margin:0; padding:0; border:0 none; }',
@@ -365,6 +372,16 @@ document.write(
     '.newsLink { color:#00c; cursor:pointer; float:right; font-size:12px; line-height:22px; text-decoration:underline; }',
     '.chart-container { margin: 0pt; padding: 8px 8px 8px 0; font-size:12px; }',
     '.chart-container td, .chart-container div { font-size:12px; }',
+    '.ballotInitiatives { display: none; }',
+    '.ballot-ind { backgroud-color: #eee }',
+    '.state-ballot { font-weight: bold; margin-top: 3px; }',
+    '.ballot-info { background-color: #eee; margin-bottom: 2px; padding: 3px;}',
+    '#ballot-results { display:none; position:relative; width:99%; height:340px; overflow-y: auto; overflow-x: hidden;}',
+    '.ballot-votes { border: 1px solid #000; height: 16px; margin: 0 2px;}',
+    '.yes-votes { background-color: #781980; float:left;}',
+    '.no-votes { background-color: #ff8533; float:right;}',
+    '.ballot-votes-bar td { font-size: 11px; }',
+    '.no-data { padding-top: 20%; font-weight: bold; text-align: center; }',
   '</style>'
 );
 
@@ -463,11 +480,10 @@ document.write(
                 '</tr>',
                    '<tr>',
                   '<td colspan="2" style="padding-top:7px">',
-                    '<span class="seeAllLink" id="see-all">',
-                      'seeAllResults'.T(),
-                    '</span> - ',
                     '<span class="seeAllLink" id="news-link">',
                       'newsLink'.T(),
+                    '</span>&nbsp;&nbsp;&nbsp;',
+                    '<span class="ballotInitiatives seeAllLink" id="ballot-initiatives">',
                     '</span>',
                   '</td>',
                   '<td>',
@@ -481,17 +497,19 @@ document.write(
         '<td style="width:', ww - sw, 'px;" class="rightpanel" style="background-color:#fff">',
           '<div class="chart-container">',
             '<table cellpadding="0" cellspacing="0" width="100%">',
-              '<tr>',
-                '<td width="25px"></td><td style="border-right:1px solid #000;font-weight:bold;margin-top: 10px;">Democratic</td>',
-                '<td style="text-align:right;font-weight:bold;">Republican&nbsp;</td>',
+             '<tr>',
+                '<td width="25px"></td>',
+                '<td style="font-weight:bold;margin-top: 10px;">',
+                  '<div style="width:50%;float:left;border-right:1px solid #000;">&nbsp;Democratic</div>',
+                  '<div style="text-align:right;">Republican&nbsp;</div></td>',
               '</tr>',
               '<tr>',
                 '<td width="25px" style="font-weight:bold;">House</td>',
-                '<td colspan="2"><div id="content-house" class="content"></div></td>',
+                '<td><div id="content-house" class="content"></div></td>',
               '</tr>',
               '<tr>',
                 '<td width="25px" style="font-weight:bold;">Senate</td>',
-                '<td colspan="2"><div id="content-senate" class="content"></div></td>',
+                '<td><div id="content-senate" class="content"></div></td>',
               '</tr>',
             '</table>',
           '</div>',
@@ -501,8 +519,8 @@ document.write(
         '<td colspan="2" style="width:100%; border-top:1px solid #DDD;" id="mapcol">',
           '<div id="map" style="width:100%; height:100%;">',
           '</div>',
-          '<div id="staticmap" style="display:none; position:relative; width:100%; height:100%;">',
-          '</div>',
+           '<div id="staticmap" style="display:none; position:relative; width:100%; height:100%;"></div>',
+          '<div id="ballot-results"></div>',
         '</td>',
       '</tr>',
     '</table>',
@@ -690,12 +708,12 @@ function hh() {
 function loadChart() {
   // For U. S. House.
   var barWidth = $('#content-house').width() - 3;
-  var total = 435;
   var trends = stateUS.results.trends['U.S. House'];
   var dem = trends.Dem.Won + trends.Dem.Holdovers;
   var gop = trends.GOP.Won + trends.GOP.Holdovers;
   var others = trends.Others.Won + trends.Others.Holdovers;
-  var undecided = total - dem - gop - others;
+  var total = 435 - others;
+  var undecided = total - dem - gop;
   var chart = voteBar({
     width: barWidth,
     total: total
@@ -719,12 +737,12 @@ function loadChart() {
 
   // For U. S. Senate.
   barWidth = $('#content-senate').width() - 3;
-  total = 100;
   trends = stateUS.results.trends['U.S. Senate'];
   dem = trends.Dem.Won + trends.Dem.Holdovers;
   gop = trends.GOP.Won + trends.GOP.Holdovers;
   others = trends.Others.Won + trends.Others.Holdovers;
-  undecided = total - dem - gop - others;
+  total = 100 - others;
+  undecided = total - dem - gop;
   chart = voteBar({
     width: barWidth,
     total: total
@@ -784,12 +802,142 @@ var reloadTimer;
 
 function stateReady( state, reload ) {
   loadChart();
-  if( ! reload ) moveToState( state );
-  polys();
+  if (isMapShown) {
+    showMap(state, reload, true);
+  } else {
+    showBallotInfo(state, reload, true);
+  }
   $('#spinner').hide();
   //reloadTimer = setTimeout( function() { loadState( true ); }, 300000 );
 }
+function checkBallotsData() {
+  state = curState.results.totals;
+  ballotExist = false;
+  var races = state.races;
+  for (var race in races) {
+    if (race != 'U.S. House' && race != 'U.S. Senate' && race != 'Governor') {
+      ballotExist = true;
+    }
+  }
+  return ballotExist;
+}
+function showHideBallotsLink(state) {
+  if (state != 'us' && !checkBallotsData()) {
+    $('#ballot-initiatives').hide();
+    return;
+  }
+  $('#ballot-initiatives').text(strings.ballot);
+  $('#ballot-initiatives').show();
+  $('#ballot-initiatives').click(showBallotInfo);
+}
 
+function showBallotInfo(state, reload, fetchPoly) {
+  isMapShown = false;
+  $('#ballot-initiatives').text(strings.showMap);
+  $('#map').hide();
+  $('#stateInfoSelector').attr('disabled', true);
+  $('#ballot-results').show();
+  $('#ballot-initiatives').unbind('click');
+  $('#ballot-initiatives').click(function() {
+    showMap(state, reload, fetchPoly);
+  });
+  var locals = stateUS.results.locals;
+  var html = [];
+  if (opt.state != 'us') {
+    if (checkBallotsData()) {
+      html.push(showIndividualStateBallot(curState.results.totals));
+    } else {
+      html.push('<div class="no-data">', strings.noData, '</div>');
+    }
+  } else {
+    for (var state in locals) {
+      html.push(showIndividualStateBallot(locals[state]));
+    }
+  }
+  $('#ballot-results').html(html.join(''));
+}
+
+function showIndividualStateBallot(state) {
+  var isBallot = false;
+  var html = ['<div class="state-ballot">',  state.name, '</div>'];
+  var races = state.races;
+  for (var race in races) {
+    if (race != 'U.S. House' && race != 'U.S. Senate' && race != 'Governor') {
+      isBallot = true;
+      html.push(showIndividualRaceBallot(race, races[race], state.precincts));
+    }
+  }
+  return isBallot ? html.join('') : '';
+}
+
+function showIndividualRaceBallot(race, raceObj, precincts) {
+  var html = [];
+  for (var ballot in raceObj) {
+    html.push(showIndividualBallotInfo(race, ballot, raceObj[ballot], precincts));
+  }
+  return html.join('');
+}
+
+function showIndividualBallotInfo(race, ballot, ballotObj, precincts) {
+  var totalp = precincts.total;
+  var reportingp = precincts.reporting;
+  var percentage = Math.round((reportingp / totalp) * 100);
+  var html = [
+    '<table cellpadding="0" cellspacing="0" class="ballot-info" width=100%">',
+      '<tr>',
+        '<td style="font-size: 11px;">',
+          race, '&nbsp;', ballot,
+        '</td>',
+        '<td width="50%">',
+          getBallotVoteBar(ballotObj, precincts),
+        '</td>',
+      '</tr>',
+    '</table>'
+  ];
+  return html.join('');
+}
+
+function getBallotVoteBar(ballotObj, precincts) {
+  var id = ballotObj.votes[0].id;
+  var yes, no;
+  if (id == 2) {
+    yes = ballotObj.votes[0].votes;
+    no = ballotObj.votes[1].votes;
+  } else {
+    yes = ballotObj.votes[1].votes;
+    no = ballotObj.votes[0].votes;
+  }
+  var totalp =  yes + no;
+  var yesPercentage = (yes / totalp) * 100 || 0;
+  var noPercentage = (no / totalp) * 100 || 0;
+  var yesText = '';
+  var noText = '';
+  if (yesPercentage) {
+    yesText = '&nbsp;';
+  }
+  if (noPercentage) {
+    noText = '&nbsp;';
+  }
+  var html = [
+    '<table cellpadding="0" cellspacing="0" width="100%" class="ballot-votes-bar">',
+      '<tr>',
+        '<td width="32px">',
+          'Yes<br>', Math.round(yesPercentage * 10) / 10, '%',
+        '</td>',
+        '<td>',
+          '<div class="ballot-votes">',
+            '<span style="width:', yesPercentage, '%" class="yes-votes">', yesText, '</span>',
+            '<span style="width:', noPercentage, '%"  class="no-votes">', noText, '</span>',
+          '&nbsp;</div>',
+        '</td>',
+        '<td width="32px" align="left">',
+          'No<br>', Math.round(noPercentage * 10) / 10, '%',
+        '</td>',
+      '</tr>',
+    '</table>'
+  ];
+  return html.join('');
+}
 function moveToState( state ) {
   staticmap = opt.static  &&  state == stateUS;
   if( staticmap ) {
@@ -839,6 +987,21 @@ function getStateDistricts( places, state ) {
   return districts;
 }
 
+function showMap(state, reload, fetchPoly) {
+  if( ! reload ) moveToState( state );
+  showHideBallotsLink(opt.state);
+  isMapShown = true;
+  $('#ballot-initiatives').text(strings.ballot);
+  $('#map').show();
+  $('#stateInfoSelector').attr('disabled', false);
+  $('#ballot-results').hide();
+  $('#ballot-initiatives').unbind('click');
+  $('#ballot-initiatives').click(showBallotInfo);
+  if (fetchPoly) {
+    polys();
+  }
+}
+
 function polys() {
   var congress, stateCongress;
   if( opt.infoType == 'U.S. House' ) {
@@ -850,7 +1013,7 @@ function polys() {
     }
   }
   else if( curState.abbr == 'AK'  ||  curState != stateUS && opt.infoType == 'U.S. Senate' ) {
-    var place = $.extend( {}, stateUS.shapes.places.state.by.state[curState.abbr.toLowerCase()] );
+    var place = $.extend( {}, stateUS.shapes && stateUS.shapes.places.state.by.state[curState.abbr.toLowerCase()] );
     delete place.zoom;
     delete place.offset;
     var p = [ place ];
@@ -927,9 +1090,6 @@ function polys() {
 }
 
 function colorize( congress, places, results, race ) {
-  var lastUpdatedTime = results.dttime;
-  var dtElement = document.getElementById('idTime');
-  dtElement.innerHTML = 'Updated: ' + lastUpdatedTime+ ' ET';
   var locals = results.locals;
   // Use wider borders in IE to cover up gaps between borders, except in House view
   strokeWidth = $.browser.msie && opt.infoType != 'U.S. House' ? 2 : 1;
@@ -955,7 +1115,7 @@ function colorize( congress, places, results, race ) {
       //place.fillOpacity = 1;
       place.fillColor = '#FFFFFF';
       place.fillOpacity = 0;
-			//window.console && console.log( 'Missing place', place.name );
+      //window.console && console.log( 'Missing place', place.name );
       continue;
     }
     if (local.races) {
@@ -1086,7 +1246,9 @@ function formatTip( place ) {
   var precincts = place.precincts;
   var races = place.races;
   var boxColor = '#E0DDCC';
-  var winner = place.candidates[ races && races[0].final ];
+  if(races && races[0] && races[0].final) {
+    var winner = place.candidates[ races && races[0] && races[0].final ];
+  }
   if( winner ) {
     var party = parties[ winner.split('|')[0] ];
     boxColor = party && party.barColor || boxColor;
@@ -1321,6 +1483,9 @@ function getShapes( state, callback ) {
 function getResults( state, callback ) {
 	getJSON( 'votes', opt.voteUrl2010, state.abbr.toLowerCase() + '-all.json', 300, function( results ) {
     state.results = results;
+    var lastUpdatedTime = results.dttime;
+    var dtElement = document.getElementById('idTime');
+    dtElement.innerHTML = 'Updated: ' + lastUpdatedTime+ ' ET';
     callback();
   });
 }
@@ -1334,7 +1499,7 @@ function objToSortedKeys( obj ) {
 var blank = imgUrl( 'blank.gif' );
 
 function voteBar( a, left, center, right ) {
-
+  var leftWidth;
   function topLabel( who, side ) {
     return S(
       '<td width="48%" align="', side, '">',
@@ -1346,31 +1511,32 @@ function voteBar( a, left, center, right ) {
   }
 
   function bar( who, side ) {
-    var w = who.votes / a.total * ( a.width);
+    var w = (a.width / a.total) * ( who.votes ) - 1;
+    if (side == 'left')
+      leftWidth = w;
+    var votes = formatNumber(who.votes);
     return S(
       '<div class="barnum" style="float:left; background:', who.color, '; width:', w, 'px; height:16px; padding-top:1px; text-align:', side || 'center', '">',
         '<img src="', blank, '" />',
       '</div>',
       side ? S(
       '<div class="barvote" style="z-index:1; position:absolute; top:1px; ', side == 'left' ? 'left:6px;' : 'right:10px;', '">',
-        formatNumber(who.votes),
+        votes,
       '</div>'
       ) : S(
-      '<div class="nuetral" style="z-index:1; position:absolute; top:1px;left:', (a.width / 2) - 4, '">',
+      '<div class="nuetral" style="z-index:1; position:absolute; top:1px;left:', leftWidth + (w / 2) - Math.floor(votes.length / 2), '">',
         formatNumber(who.votes),
       '</div>'
       )
     );
   }
-
   return S(
      '<table width="', a.width, '" cellspacing="0" cellpadding="0">',
       '<tr>',
         '<td colspan="3" align="center">',
           '<div style="margin: 4px 0;" align="center">',
-            '<div style="width:100%; position:relative;" align="center">',
+            '<div style="width:100%; position:relative;overflow: hidden" align="center">',
               bar( left, 'left' ), bar( center), bar( right, 'right' ),
-              '</div>',
             '</div>',
           '</div>',
         '</td>',
