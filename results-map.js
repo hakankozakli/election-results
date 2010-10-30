@@ -374,7 +374,7 @@ if( opt.tpm ) document.write(
   '</style>',
 
   '<div style="margin-bottom:4px;">',
-		'<img style="border:none; width:573px; height:36px;" src="', imgUrl('tpm/tpm-scoreboard.png'), '" />',
+     '<img style="border:none;" src="', imgUrl('tpm/tpm-scoreboard.png'), '" />',
   '</div>'
 );
 
@@ -1085,7 +1085,7 @@ function formatTip( place ) {
   if( ! place ) return null;
   var precincts = place.precincts;
   var races = place.races;
-  var boxColor = '#F2EFE9';
+  var boxColor = '#E0DDCC';
   var winner = place.candidates[ races && races[0].final ];
   if( winner ) {
     var party = parties[ winner.split('|')[0] ];
@@ -1297,8 +1297,9 @@ function loadState( reload ) {
   opt.infoType = $select.val();
 
   var state = curState = stateByAbbr( abbr );
-  $('#news-link').html( S('<a href="' + newsUrl + '?q=' + state.name + '+'
-      + $select.val() + '+Election+Results" target="_blank">' + strings.newsLink + '</a>'));
+  $('#news-link').html( S('<a href="' + newsUrl + '?q=' + state.name.replace('United States', 'News') + '+' +
+    $select.val().replace('U.S. ','') + '+Election" target="_blank">' + strings.newsLink + '</a>'));
+  
   $('#spinner').show();
   getShapes( state, function() {
     getResults( state, function() {
