@@ -8,6 +8,9 @@
 # http://www.opensource.org/licenses/mit-license.php
 # http://www.opensource.org/licenses/gpl-2.0.php
 
+from datetime import datetime
+from pytz import timezone
+
 import copy
 import os
 import os.path
@@ -15,7 +18,7 @@ import re
 import sys
 import time
 import random
-import simplejson as sj
+import json as sj
 import xml.dom.minidom
 
 import states
@@ -95,25 +98,6 @@ def loadTrends( house ):
 			result[name][type] = int( trend.getAttribute('value') )
 	return result
 
-def loadElectoralVotes( usall ):
-	feed = datapath + 'pres_electoral.txt'
-	print 'Processing %s' % feed
-	f = open( feed, 'r' )
-	for line in f:
-		row = line.rstrip('\n').split(';')
-		abbr = row[2]
-		id = row[4]
-		electoral = int(row[5])
-		total = int(row[11])
-		state = usall
-		if abbr != 'US':
-			state = states.byAbbr[abbr]
-		votes = state['races']['President']['']['votes']
-		if id not in votes: votes[id] = { 'id': id, 'votes': 0 }
-		votes[id]['electoral'] = electoral
-		state['electoral'] = total
-	f.close()
-
 def readVotes( report ):
 	feed = datapath + report
 	print 'Processing %s' % feed
@@ -183,13 +167,16 @@ def percentage( n ):
 	return pct
 
 def sortVotes( entity ):
-	for race in entity['races'].itervalues():
-		for seat in race.itervalues():
-			if not seat.get('votes'): seat['votes'] = {}
-			tally = seat['votes'].values()
-			tally.sort( lambda a, b: b['votes'] - a['votes'] )
-			seat['votes'] = tally
-
+	try:
+		for race in entity['races'].itervalues():
+			for seat in race.itervalues():
+				if not seat.get('votes'): seat['votes'] = {}
+				tally = seat['votes'].values()
+				tally.sort( lambda a, b: b['votes'] - a['votes'] )
+				seat['votes'] = tally
+	except KeyError:
+		pass
+	
 def cleanNum( n ):
 	return int( re.sub( '[^0-9]', '', n ) or 0 )
 
@@ -209,47 +196,46 @@ def makeJson( type ):
 	#def addLeader( party ):
 	#	if len(party['votes']):
 	#		leaders[ party['votes'][0]['name'] ] = True
-	loadElectoralVotes( usall )
+	#print usall
 	for st in states.array:
+		#print "state is ===>", st
 		state = copy.deepcopy( st )
 		statetotal = 0
 		sortVotes( state )
 		statevotes[ state['name'] ] = state
 		#print 'Loading %s' %( state['name'] )
 		cands = {}
-		for key, race in state['races'].iteritems():
-			for seat in race.itervalues():
-				for vote in seat['votes']:
-					id = vote['id']
-					if id not in cands: cands[id] = candidates[id]
-					if key == 'President':
-						count = vote['votes']
-						if id not in usvotes:
-							usvotes[id] = { 'id': id, 'votes': 0 }
-						usvotes[id]['votes'] += count
-						ustotal += count
-						statetotal += count
+		try:
+			for key, race in state['races'].iteritems():
+				for seat in race.itervalues():
+					for vote in seat['votes']:
+						id = vote['id']
+						if id not in cands: cands[id] = candidates[id]
+		except KeyError:
+			pass
 		countyvotes = {}
 		counties = state.get( 'counties', {} )
 		for countyname, county in counties.iteritems():
 			sortVotes( county )
 			#addLeader( county )
 			countytotal = 0
-			for vote in county['races']['President']['']['votes']:
-				countytotal += vote['votes']
-			county['races']['President']['']['total'] = countytotal
-			countyvotes[countyname] = county
-		#setPins( countyvotes )
-		del state['counties']
+		try:
+			del state['counties']
+		except KeyError:
+			pass
+                fmt = "%b %d,%Y %I:%M %p"
+                now_utc = datetime.now(timezone('UTC'))
+                now_eastern = now_utc.astimezone(timezone('US/Eastern'))
 		if type == 'all':
 			writeFile(
 				'%s%s-%s.json' %( jsonpath, state['abbr'].lower(), type ),
 				json({
 					'state': state['abbr'],
-					'candidates': cands,
+			        'candidates': cands,
 					'total': statetotal,
 					'totals': state,
-					'locals': countyvotes
+					'locals': countyvotes,
+	                'dttime': now_eastern.strftime(fmt)
 				}) )
 	sortVotes( usall )
 	#setPins( statevotes )
@@ -258,7 +244,8 @@ def makeJson( type ):
 		'candidates': candidates,
 		'total': ustotal,
 		'totals': usall,
-		'locals': statevotes
+		'locals': statevotes,
+		'dttime': now_eastern.strftime(fmt)
 	}
 	if type == 'all':
 		j['trends'] = trends
@@ -284,12 +271,8 @@ def writeFile( filename, data ):
 	f.close()
 
 def update():
-	#fetchData( feed )
-	trends['President'] = loadPresSummary()
-	trends['U.S. House'] = loadTrends( 'h' )
+    trends['U.S. House'] = loadTrends( 'h' )
 	trends['U.S. Senate'] = loadTrends( 's' )
-	readVotes( 'pres_county.txt' )
-	print 'Creating presidential votes JSON...'
 	makeJson( 'pres' )
 	readVotes( 'US.txt' )
 	print 'Creating top of ticket votes JSON...'
@@ -305,6 +288,6 @@ def main():
 		#time.sleep( 600 )
 
 if __name__ == "__main__":
-	datapath = '../general-election-private/ap/2008/'
-	jsonpath = '../general-election-data/json/votes/2008/'
+	datapath = './general-election-private/ap/2010/'
+	jsonpath = './general-election-data/json/votes/2010/'
 	main()
