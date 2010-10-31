@@ -17,7 +17,7 @@
 	scaling="false"
 	scrolling="false">
 	<Require feature="analytics"/>
-	<!--Locale messages="http://election-results.googlecode.com/svn/trunk/ALL_ALL.xml" /-->
+	<!--Locale messages="http://general-election-2010-data-test.googlecode.com/svn/trunk/ALL_ALL.xml" /-->
 </ModulePrefs>
 
 <Content type="html">
@@ -26,21 +26,27 @@
   body a:visited {
     color: #551A8B;
   }
+  .leftcol {
+    float: left;
+  }
+  .rightcol {
+    float: right;
+  }
   .source-column {
     font-family: arial,sans-serif;
     font-size: 84%;
     line-height: 1.3 em;
     text-align: left;
-    float: left;
+    margin: 0 0 0 4px;
     padding-right: 12px;
   }
   .source-link {
-    padding-bottom: 1px;
+    margin: 7px 0 0 0;
   }
 </style>
 
 <div>
-  <div class="source-column">
+  <div class="source-column leftcol">
     <div class="source-link"><a href="http://abcnews.go.com/politics" target="_blank">ABC News</a></div>
     <div class="source-link"><a href="http://www.cbsnews.com/election2010" target="_blank">CBS News</a></div>
     <div class="source-link"><a href="http://www.cnn.com/POLITICS/" target="_blank">CNN</a></div>
@@ -48,7 +54,7 @@
     <div class="source-link"><a href="http://www.latimes.com/news/politics/" target="_blank">L.A. Times</a></div>
     <div class="source-link"><a href="http://www.msnbc.msn.com/id/3032553/ns/politics" target="_blank">MSNBC</a></div>
   </div>
-  <div class="source-column">
+  <div class="source-column rightcol">
     <div class="source-link"><a href="http://www.nytimes.com/pages/politics/index.html" target="_blank">N.Y. Times</a></div>
     <div class="source-link"><a href="http://www.politico.com/2010/" target="_blank">Politico</a></div>
     <div class="source-link"><a href="http://www.realclearpolitics.com/elections/" target="_blank">Real Clear Politics</a></div>
