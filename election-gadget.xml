@@ -3,8 +3,8 @@
 
 <ModulePrefs
 	title="2010 Election Results from Google"
-	title_url="http://www.google.com/intl/en_us/2008election/"
-	description="View live election results for the 2008 US General Election."
+	title_url="http://news.google.com/news/section?cf=all&ned=us&topic=el&ict=ln"
+	description="View live election results for the 2010 US General Election."
 	category="politics"
 	thumbnail=""
 	screenshot=""
