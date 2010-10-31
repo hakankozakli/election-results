@@ -28,13 +28,6 @@ trends = {}
 
 isTestData = False
 
-#def str( text ):
-#	strings = {
-#		'county': 'town',
-#		'counties': 'towns'
-#	}
-#	return strings[text] or text
-
 def formatNumber( number ):
 	return str(number)
 
@@ -149,11 +142,6 @@ def setVoteData( row ):
 			jr = ''
 			if can[7] != '0': jr = ', ' + can[6]
 			name = first + ' ' + last + jr
-			#candidates[id] = {
-			#	'party': party,
-			#	'last': last,
-			#	'full': name
-			#}
 			candidates[id] = '|'.join([ party, last, name ]);
 			print 'Added %s candidate %s' %( party, name )
 		candidate = candidates[id]
@@ -192,11 +180,6 @@ def makeJson( type ):
 		}
 	}
 	statevotes = {}
-	#leaders = {}
-	#def addLeader( party ):
-	#	if len(party['votes']):
-	#		leaders[ party['votes'][0]['name'] ] = True
-	#print usall
 	for st in states.array:
 		#print "state is ===>", st
 		state = copy.deepcopy( st )
