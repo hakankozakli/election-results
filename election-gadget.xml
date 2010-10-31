@@ -15,11 +15,9 @@
 	width="620"
 	height="480"
 	scaling="false"
-	scrolling="false"
->
+	scrolling="false">
 	
 	<Require feature="analytics"/>
-	
 	<Locale messages="http://election-results.googlecode.com/svn/trunk/ALL_ALL.xml" />
 	<Locale lang="es" messages="http://election-results.googlecode.com/svn/trunk/es_ALL.xml" />
 	<Locale lang="it" messages="http://election-results.googlecode.com/svn/trunk/it_ALL.xml" />
