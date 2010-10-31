@@ -3,7 +3,7 @@
 
 <ModulePrefs
 	title="2010 Election Results from Google"
-	title_url="http://news.google.com/news/section?cf=all&ned=us&topic=el&ict=ln"
+	title_url="http://news.google.com/news/section?cf=all"
 	description="View live election results for the 2010 US General Election."
 	category="politics"
 	thumbnail=""
