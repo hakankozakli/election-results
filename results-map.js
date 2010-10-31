@@ -1455,9 +1455,15 @@ function loadState( reload ) {
   opt.infoType = $select.val();
 
   var state = curState = stateByAbbr( abbr );
-  $('#news-link').html( S('<a href="' + newsUrl + '?q=' + state.name.replace('United States', 'News') + '+' +
-    $select.val().replace('U.S. ','') + '+Election" target="_blank">' + strings.newsLink + '</a>'));
-  
+
+  if(state.name.indexOf('United States') != -1) {
+    $('#news-link').html( S('<a href="' + newsUrl + '?q=' + state.name.replace('United States', '') +
+      $select.val().replace('U.S. ','') + '+Election+News" target="_blank">' + strings.newsLink + '</a>'));  
+  } else {
+	  $('#news-link').html( S('<a href="' + newsUrl + '?q=' + state.name + '+' +
+	    $select.val().replace('U.S. ','') + '+Election" target="_blank">' + strings.newsLink + '</a>'));  
+  }
+  	  
   $('#spinner').show();
   getShapes( state, function() {
     getResults( state, function() {
