@@ -206,19 +206,19 @@ def makeJson( type ):
 			del state['counties']
 		except KeyError:
 			pass
-                fmt = "%b %d,%Y %I:%M %p"
-                now_utc = datetime.now(timezone('UTC'))
-                now_eastern = now_utc.astimezone(timezone('US/Eastern'))
+		fmt = "%b %d,%Y %I:%M %p"
+		now_utc = datetime.now(timezone('UTC'))
+		now_eastern = now_utc.astimezone(timezone('US/Eastern'))
 		if type == 'all':
 			writeFile(
 				'%s%s-%s.json' %( jsonpath, state['abbr'].lower(), type ),
 				json({
 					'state': state['abbr'],
-			        'candidates': cands,
+				'candidates': cands,
 					'total': statetotal,
 					'totals': state,
 					'locals': countyvotes,
-	                'dttime': now_eastern.strftime(fmt)
+			'dttime': now_eastern.strftime(fmt)
 				}) )
 	sortVotes( usall )
 	#setPins( statevotes )
@@ -254,7 +254,7 @@ def writeFile( filename, data ):
 	f.close()
 
 def update():
-    trends['U.S. House'] = loadTrends( 'h' )
+	trends['U.S. House'] = loadTrends( 'h' )
 	trends['U.S. Senate'] = loadTrends( 's' )
 	makeJson( 'pres' )
 	readVotes( 'US.txt' )
