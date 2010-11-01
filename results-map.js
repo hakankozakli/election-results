@@ -829,7 +829,7 @@ function stateReady( state, reload ) {
   $('#ballot-initiatives').unbind('click');
   $('#ballot-initiatives').click(function() {
     toggleBallotInitiatives(state, reload);
-  });  
+  });
   //reloadTimer = setTimeout( function() { loadState( true ); }, 300000 );
 }
 function checkBallotsData() {
@@ -847,19 +847,19 @@ function checkBallotsData() {
 function toggleBallotInitiatives(state, reload) {
   if (showingBallotInitiatives) {
     // Hide ballot initiatives, show map.
-    $('#ballot-initiatives').text(strings.ballot); 
+    $('#ballot-initiatives').text(strings.ballot);
     $('#stateInfoSelector').attr('disabled', false);
-    $('#ballot-results').hide();        
+    $('#ballot-results').hide();
     if (!reload) moveToState(state);
     polys();
     showingBallotInitiatives = false;
   } else {
-    updateBallotInfo(state);      
+    updateBallotInfo(state);
     $('#ballot-initiatives').text(strings.showMap);
-    $('#map').hide();    
-    $('#staticmap').hide();    
-    $('#stateInfoSelector').attr('disabled', true);    
-    $('#ballot-results').show();    
+    $('#map').hide();
+    $('#staticmap').hide();
+    $('#stateInfoSelector').attr('disabled', true);
+    $('#ballot-results').show();
     showingBallotInitiatives = true;
   }
 }
@@ -1203,6 +1203,8 @@ function formatRace( place, race, count, index ) {
     });
     tally = tally1;
   }
+  var races = place.races;
+  var winner = place.candidates[ races && races[0] && races[0].final ];
   return S(
     '<div>',
       '<table cellpadding="0" cellspacing="0">',
@@ -1215,6 +1217,7 @@ function formatRace( place, race, count, index ) {
           return S(
             '<tr>',
               '<td style="', common, 'padding-right:12px;">',
+                (winner && total && i == 0) ? '&#10004&nbsp;' : '&nbsp;&nbsp;&nbsp;&nbsp;',
                 candidate[2], ' (', party && party.letter || candidate[0], ')',
               '</td>',
               unopposed ? S(
@@ -1471,12 +1474,12 @@ function loadState( reload ) {
 
   if(state.name.indexOf('United States') != -1) {
     $('#news-link').html( S('<a href="' + newsUrl + '?q=' + state.name.replace('United States', '') +
-      $select.val().replace('U.S. ','') + '+Election+News" target="_blank">' + strings.newsLink + '</a>'));  
+      $select.val().replace('U.S. ','') + '+Election+News" target="_blank">' + strings.newsLink + '</a>'));
   } else {
 	  $('#news-link').html( S('<a href="' + newsUrl + '?q=' + state.name + '+' +
-	    $select.val().replace('U.S. ','') + '+Election" target="_blank">' + strings.newsLink + '</a>'));  
+	    $select.val().replace('U.S. ','') + '+Election" target="_blank">' + strings.newsLink + '</a>'));
   }
-  	  
+
   $('#spinner').show();
   getShapes( state, function() {
     getResults( state, function() {
@@ -1570,7 +1573,7 @@ $window
     _IG_Analytics( 'UA-5730550-1', '/results' );
   })
   .bind( 'unload', GUnload );
-  
+
 
 function getTabularData() {
   alert('selected state is  ' + opt.state);
