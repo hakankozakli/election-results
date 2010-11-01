@@ -1183,6 +1183,7 @@ function getSeats( race, seat ) {
   if( race[seat] ) return [ race[seat] ];
   if( race['NV'] ) return [ race['NV'] ];
   if( race['2006'] && race['2008'] ) return [ race['2006'], race['2008'] ];
+  if( race['2010']) return [ race['2010']];
   return null;
 }
 
