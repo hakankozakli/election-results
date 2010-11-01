@@ -43,7 +43,7 @@ var strings = {
   no: 'no',
   noData: 'No Ballot Initiatives Found'
 };
-var isMapShown = true;
+var showingBallotInitiatives = false;
 var newsUrl = 'http://news.google.com/news/section';
 document.write(
   '<style type="text/css">',
@@ -57,7 +57,7 @@ var prefs = new _IG_Prefs();
 
 var opt = window.GoogleElectionMapOptions || {};
 opt.static1 = ( ww == 573  &&  wh == 463 );
-opt.static = opt.static1  ||  ( ww == 620  &&  wh == 480 );
+opt.static = opt.static1  ||  ( ww == 620  &&  wh == 530 );
 opt.fontsize = '15px';
 var sw = opt.panelWidth = 180;
 
@@ -802,12 +802,14 @@ var reloadTimer;
 
 function stateReady( state, reload ) {
   loadChart();
-  if (isMapShown) {
-    showMap(state, reload, true);
-  } else {
-    showBallotInfo(state, reload, true);
-  }
+  if (!reload) moveToState(state);
+  polys();
   $('#spinner').hide();
+  $('#ballot-initiatives').text(strings.ballot);
+  $('#ballot-initiatives').unbind('click');
+  $('#ballot-initiatives').click(function() {
+    toggleBallotInitiatives(state, reload);
+  });  
   //reloadTimer = setTimeout( function() { loadState( true ); }, 300000 );
 }
 function checkBallotsData() {
@@ -821,22 +823,28 @@ function checkBallotsData() {
   }
   return ballotExist;
 }
-function showHideBallotsLink(state) {
-  $('#ballot-initiatives').text(strings.ballot);
-  $('#ballot-initiatives').show();
-  $('#ballot-initiatives').click(showBallotInfo);
+
+function toggleBallotInitiatives(state, reload) {
+  if (showingBallotInitiatives) {
+    // Hide ballot initiatives, show map.
+    $('#ballot-initiatives').text(strings.ballot); 
+    $('#stateInfoSelector').attr('disabled', false);
+    $('#ballot-results').hide();        
+    if (!reload) moveToState(state);
+    polys();
+    showingBallotInitiatives = false;
+  } else {
+    updateBallotInfo(state);      
+    $('#ballot-initiatives').text(strings.showMap);
+    $('#map').hide();    
+    $('#staticmap').hide();    
+    $('#stateInfoSelector').attr('disabled', true);    
+    $('#ballot-results').show();    
+    showingBallotInitiatives = true;
+  }
 }
 
-function showBallotInfo(state, reload, fetchPoly) {
-  isMapShown = false;
-  $('#ballot-initiatives').text(strings.showMap);
-  $('#map').hide();
-  $('#stateInfoSelector').attr('disabled', true);
-  $('#ballot-results').show();
-  $('#ballot-initiatives').unbind('click');
-  $('#ballot-initiatives').click(function() {
-    showMap(state, reload, fetchPoly);
-  });
+function updateBallotInfo(state) {
   var locals = stateUS.results.locals;
   var html = [];
   if (opt.state != 'us') {
@@ -981,20 +989,6 @@ function getStateDistricts( places, state ) {
       districts.push( place );
   }
   return districts;
-}
-
-function showMap(state, reload, fetchPoly) {
-  if( ! reload ) moveToState( state );
-  showHideBallotsLink(opt.state);
-  isMapShown = true;
-  $('#ballot-initiatives').text(strings.ballot);
-  $('#stateInfoSelector').attr('disabled', false);
-  $('#ballot-results').hide();
-  $('#ballot-initiatives').unbind('click');
-  $('#ballot-initiatives').click(showBallotInfo);
-  if (fetchPoly) {
-    polys();
-  }
 }
 
 function polys() {
