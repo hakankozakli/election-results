@@ -821,16 +821,17 @@ sm.insetY = sm.mapHeight - sm.insetHeight;
 var reloadTimer;
 
 function stateReady( state, reload ) {
-  loadChart();
-  if (!reload) moveToState(state);
-  polys();
-  $('#spinner').hide();
-  $('#ballot-initiatives').text(strings.ballot);
-  $('#ballot-initiatives').unbind('click');
-  $('#ballot-initiatives').click(function() {
-    toggleBallotInitiatives(state, reload);
-  });
-  //reloadTimer = setTimeout( function() { loadState( true ); }, 300000 );
+ loadChart();
+ $('#spinner').hide();
+ $('#ballot-initiatives').text(strings.ballot);
+ $('#ballot-initiatives').unbind('click');
+ $('#ballot-initiatives').unbind('click');
+ $('#ballot-initiatives').click(function() {
+   toggleBallotInitiatives(state, reload);
+ });
+ showingBallotInitiatives = !showingBallotInitiatives;
+ toggleBallotInitiatives(state, reload);
+ //reloadTimer = setTimeout( function() { loadState( true ); }, 300000 );
 }
 function checkBallotsData() {
   state = curState.results.totals;
@@ -845,25 +846,31 @@ function checkBallotsData() {
 }
 
 function toggleBallotInitiatives(state, reload) {
-  if (showingBallotInitiatives) {
-    // Hide ballot initiatives, show map.
-    $('#ballot-initiatives').text(strings.ballot);
-    $('#stateInfoSelector').attr('disabled', false);
-    $('#ballot-results').hide();
-    if (!reload) moveToState(state);
-    polys();
-    showingBallotInitiatives = false;
-  } else {
-    updateBallotInfo(state);
-    $('#ballot-initiatives').text(strings.showMap);
-    $('#map').hide();
-    $('#staticmap').hide();
-    $('#stateInfoSelector').attr('disabled', true);
-    $('#ballot-results').show();
-    showingBallotInitiatives = true;
-  }
+ if (showingBallotInitiatives) {
+   // Hide ballot initiatives, show map.
+   $('#ballot-initiatives').text(strings.ballot);
+   $('#stateInfoSelector').attr('disabled', false);
+   $('#ballot-results').hide();
+   if (!reload) {
+     moveToState(state);
+   } else {
+     $('#ballot-initiatives').unbind('click');
+     $('#ballot-initiatives').click(function() {
+       toggleBallotInitiatives(state);
+     });
+   }
+   polys();
+   showingBallotInitiatives = false;
+ } else {
+   updateBallotInfo(state);
+   $('#ballot-initiatives').text(strings.showMap);
+   $('#map').hide();
+   $('#staticmap').hide();
+   $('#stateInfoSelector').attr('disabled', true);
+   $('#ballot-results').show();
+   showingBallotInitiatives = true;
+ }
 }
-
 function sortStates(obj) {
   var keys = [];
   for (var key in obj) {
