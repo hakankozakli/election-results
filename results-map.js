@@ -53,8 +53,6 @@ document.write(
 
 var $window = $(window), ww = $window.width(), wh = $window.height();
 
-var prefs = new _IG_Prefs();
-
 var opt = window.GoogleElectionMapOptions || {};
 opt.static1 = ( ww == 573  &&  wh == 463 );
 opt.static = opt.static1  ||  ( ww == 620  &&  wh == 530 );
@@ -65,7 +63,9 @@ opt.codeUrl = opt.codeUrl || 'http://election-results.googlecode.com/svn/trunk/'
 opt.imgUrl = opt.imgUrl || opt.codeUrl + 'images/';
 opt.shapeUrl = opt.shapeUrl || 'http://general-election-2008-data.googlecode.com/svn/trunk/json/shapes/';
 
-opt.voteUrl2010 = 'http://general-election-2010-data-test.googlecode.com/svn/trunk/json/votes/2010/';
+opt.voteUrl2010 = GoogleElectionMapOptions.isTesting ?
+    'http://general-election-2010-data-test.googlecode.com/svn/trunk/json/votes/2010/' :
+    'http://general-election-2010-data.googlecode.com/svn/trunk/json/votes/2010/';
 opt.state = opt.state || 'us';
 
 if( ! Array.prototype.forEach ) {
@@ -378,8 +378,8 @@ document.write(
     '.ballot-info { background-color: #eee; margin-bottom: 2px; padding: 3px;}',
     '#ballot-results { display:none; position:relative; width:99%; height:340px; overflow-y: auto; overflow-x: hidden;}',
     '.ballot-votes { border: 1px solid #000; height: 16px; margin: 0 2px;}',
-    '.yes-votes { background-color: #781980; float:left;}',
-    '.no-votes { background-color: #ff8533; float:right;}',
+    '.yes-votes { background-color: #00aa00; float:left;}',
+    '.no-votes { background-color: #cc0000; float:right;}',
     '.ballot-votes-bar td { font-size: 11px; }',
     '.no-data { padding-top: 20%; font-weight: bold; text-align: center; }',
   '</style>'
@@ -582,7 +582,7 @@ var parties = {
   Neb: {},
   New: { letter:'N' },
   Obj: {},
-  Oth: {},
+  Oth: { color:'#00aa00', barColor:'#00aa00' },
   PAG: {},
   PCF: {},
   PEC: {},
@@ -608,8 +608,10 @@ if( opt.tpm ) {
   parties.Dem.barColor = '#006699';
   parties.GOP.color = '#990000';
   parties.GOP.barColor = '#990000';
-  parties.x.color = '#E0DDCC';
-  parties.x.barColor = '#E0DDCC';
+  parties.Oth.color = '#00aa00';
+  parties.Oth.barColor = '#00aa00';
+  parties.x.color = '#bbb';
+  parties.x.barColor = '#bbb';
   fillOpacity = .7;
 }
 
@@ -711,21 +713,28 @@ function loadChart() {
   var trends = stateUS.results.trends['U.S. House'];
   var dem = trends.Dem.Won + trends.Dem.Holdovers;
   var gop = trends.GOP.Won + trends.GOP.Holdovers;
-  var others = trends.Others.Won + trends.Others.Holdovers;
-  var total = 435 - others;
-  var undecided = total - dem - gop;
+  var others = trends.Others.Won + trends.Others.Holdovers || 0;
+  var total = 435;
+  var undecided = total - dem - gop - others;
   var chart = voteBar({
     width: barWidth,
     total: total
   }, {
+    name: dem + ' ' + getSeatText(dem) + ' won by Democrats',
     votes: dem,
     color: parties.Dem.barColor
   }, {
+    name: undecided + ' ' + getSeatText(undecided) + ' are still active',
     votes: undecided,
     color: parties.x.barColor
   }, {
+    name: gop + ' ' + getSeatText(undecided) + ' won by Republicans',
     votes: gop,
     color: parties.GOP.barColor
+  }, {
+    name: others + ' ' + getSeatText(undecided) + ' won by Independents',
+    votes: others,
+    color: parties.Oth.barColor
   });
   $('#content-house').html( S(
     '<div id="chart" style="margin-left: 3px">',
@@ -740,21 +749,28 @@ function loadChart() {
   trends = stateUS.results.trends['U.S. Senate'];
   dem = trends.Dem.Won + trends.Dem.Holdovers;
   gop = trends.GOP.Won + trends.GOP.Holdovers;
-  others = trends.Others.Won + trends.Others.Holdovers;
-  total = 100 - others;
-  undecided = total - dem - gop;
+  others = trends.Others.Won + trends.Others.Holdovers || 0;
+  total = 100;
+  undecided = total - dem - gop - others;
   chart = voteBar({
     width: barWidth,
     total: total
   }, {
+    name: dem + ' ' + getSeatText(dem) + ' won by Democrats',
     votes: dem,
     color: parties.Dem.barColor
   }, {
+    name: undecided + ' ' + getSeatText(undecided) + ' are still active',
     votes: undecided,
     color: parties.x.barColor
   }, {
+    name: gop + ' ' + getSeatText(undecided) + ' won by Republicans',
     votes: gop,
     color: parties.GOP.barColor
+  }, {
+    name: others + ' ' + getSeatText(undecided) + ' won by Independents',
+    votes: others,
+    color: parties.Oth.barColor
   });
   $('#content-senate').html( S(
     '<div id="chart" style="margin-left: 3px">',
@@ -763,6 +779,10 @@ function loadChart() {
       '</div>',
     '</div>'
   ) );
+}
+
+function getSeatText(num) {
+  return num > 1 ? 'seats' : 'seat';
 }
 
 var sm = opt.static1 ? {
@@ -1128,7 +1148,7 @@ function colorize( congress, places, results, race ) {
     var winner = id && results.candidates[id];
     if( winner ) {
       var party = parties[ winner.split('|')[0] ];
-      place.fillColor = party.color;
+      place.fillColor = party.color || '#00aa00';
       place.fillOpacity = winner ? fillOpacity : 0;
     }
     else {
@@ -1240,7 +1260,7 @@ function formatTip( place ) {
   }
   if( winner ) {
     var party = parties[ winner.split('|')[0] ];
-    boxColor = party && party.barColor || boxColor;
+    boxColor = party && party.barColor || '#00aa00';
   }
   var content = S(
     '<div class="tipcontent">',
@@ -1493,8 +1513,8 @@ function objToSortedKeys( obj ) {
 
 var blank = imgUrl( 'blank.gif' );
 
-function voteBar( a, left, center, right ) {
-  var leftWidth;
+function voteBar( a, left, center, right, others ) {
+  var leftWidth = 0;
   function topLabel( who, side ) {
     return S(
       '<td width="48%" align="', side, '">',
@@ -1506,20 +1526,22 @@ function voteBar( a, left, center, right ) {
   }
 
   function bar( who, side ) {
-    var w = (a.width / a.total) * ( who.votes ) - 1;
+    var w = (a.width / a.total) * ( who.votes );
+    if (w == 0)
+      return;
     if (side == 'left')
       leftWidth = w;
     var votes = formatNumber(who.votes);
     return S(
-      '<div class="barnum" style="float:left; background:', who.color, '; width:', w, 'px; height:16px; padding-top:1px; text-align:', side || 'center', '">',
-        '<img src="', blank, '" />',
-      '</div>',
+      S('<div class="barnum" style="float:left; background:', who.color, '; width:', w, 'px; height:15px; padding-top:1px; text-align:', side || 'center', '" title="', who.name, '">',
+        '<img src="', blank, '" /></div>'),
+      // (side && side != 'others') ? S(
       side ? S(
       '<div class="barvote" style="z-index:1; position:absolute; top:1px; ', side == 'left' ? 'left:6px;' : 'right:10px;', '">',
         votes,
       '</div>'
       ) : S(
-      '<div class="nuetral" style="z-index:1; position:absolute; top:1px;left:', leftWidth + (w / 2) - Math.floor(votes.length / 2), '">',
+      '<div class="nuetral" style="z-index:1; position:absolute; top:1px;left:', leftWidth + (w / 2) - Math.floor(votes.length / 2), '"  title="', who.name, '">',
         formatNumber(who.votes),
       '</div>'
       )
@@ -1531,7 +1553,7 @@ function voteBar( a, left, center, right ) {
         '<td colspan="3" align="center">',
           '<div style="margin: 4px 0;" align="center">',
             '<div style="width:100%; position:relative;overflow: hidden" align="center">',
-              bar( left, 'left' ), bar( center), bar( right, 'right' ),
+              bar( left, 'left' ), bar( others, 'others'), bar( center), bar( right, 'right' ),
             '</div>',
           '</div>',
         '</td>',
