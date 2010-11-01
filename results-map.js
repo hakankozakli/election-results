@@ -864,21 +864,40 @@ function toggleBallotInitiatives(state, reload) {
   }
 }
 
-function updateBallotInfo(state) {
-  var locals = stateUS.results.locals;
-  var html = [];
-  if (opt.state != 'us') {
-    if (checkBallotsData()) {
-      html.push(showIndividualStateBallot(curState.results.totals));
-    } else {
-      html.push('<div class="no-data">', strings.noData, '</div>');
-    }
-  } else {
-    for (var state in locals) {
-      html.push(showIndividualStateBallot(locals[state]));
-    }
+function sortStates(obj) {
+  var keys = [];
+  for (var key in obj) {
+    keys.push(obj[key].name);
   }
-  $('#ballot-results').html(html.join(''));
+  return keys.sort(sortByNames);
+}
+
+function sortByNames(state1, state2) {
+  if (state1 > state2) {
+    return 1;
+  } else if (state1 < state2) {
+	return -1;
+  } else {
+	return 0;
+  }
+}
+
+function updateBallotInfo(state) {
+	 var locals = stateUS.results.locals;
+	 var html = [];
+	 if (opt.state != 'us') {
+	   if (checkBallotsData()) {
+	     html.push(showIndividualStateBallot(curState.results.totals));
+	   } else {
+	     html.push('<div class="no-data">', strings.noData, '</div>');
+	   }
+	 } else {
+	   var stNames = sortStates(locals);
+	   for (var i = 0; i < stNames.length; i++) {
+	     html.push(showIndividualStateBallot(locals[stNames[i]]));
+	   }
+	 }
+	 $('#ballot-results').html(html.join(''));
 }
 
 function showIndividualStateBallot(state) {
