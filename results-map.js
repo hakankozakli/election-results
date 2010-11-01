@@ -1538,12 +1538,11 @@ function voteBar( a, left, center, right, others ) {
     return S(
       S('<div class="barnum" style="float:left; background:', who.color, '; width:', w, 'px; height:15px; padding-top:1px; text-align:', side || 'center', '" title="', who.name, '">',
         '<img src="', blank, '" /></div>'),
-      // (side && side != 'others') ? S(
-      side ? S(
+      (side && side != 'others') ? S(
       '<div class="barvote" style="z-index:1; position:absolute; top:1px; ', side == 'left' ? 'left:6px;' : 'right:10px;', '">',
         votes,
       '</div>'
-      ) : S(
+      ) : side ? '' : S(
       '<div class="nuetral" style="z-index:1; position:absolute; top:1px;left:', leftWidth + (w / 2) - Math.floor(votes.length / 2), '"  title="', who.name, '">',
         formatNumber(who.votes),
       '</div>'
