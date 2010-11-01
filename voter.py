@@ -9,16 +9,17 @@
 # http://www.opensource.org/licenses/gpl-2.0.php
 
 from datetime import datetime
+from optparse import OptionParser
 from pytz import timezone
 
 import copy
+import json as sj
 import os
 import os.path
 import re
 import sys
 import time
 import random
-import json as sj
 import xml.dom.minidom
 
 import states
@@ -27,6 +28,10 @@ candidates = {}
 trends = {}
 
 isTestData = False
+
+def zint( number ):
+	if opt.zero: return 0
+	return int( number )
 
 def formatNumber( number ):
 	return str(number)
@@ -51,7 +56,7 @@ def json( obj ):
 def getPrecincts( row ):
 	#print 'getPrecincts %s %s %s %s' %( row[0], row[1], row[2], row[3] )
 	return {
-		'reporting': int(row[3]),
+		'reporting': zint(row[3]),
 		'total': int(row[2])
 	}
 
@@ -88,7 +93,7 @@ def loadTrends( house ):
 		trends = party.getElementsByTagName( 'trend' )
 		for trend in trends:
 			type = trend.getAttribute( 'name' )
-			result[name][type] = int( trend.getAttribute('value') )
+			result[name][type] = zint( trend.getAttribute('value') )
 	return result
 
 def readVotes( report ):
@@ -126,7 +131,7 @@ def setVoteData( row ):
 	if seat not in seats: seats[seat] = { 'votes': {} }
 	if 'precincts' not in entity:
 		entity['precincts'] = {
-			'reporting': int(row[17]),
+			'reporting': zint(row[17]),
 			'total': int(row[18])
 		}
 	
@@ -145,9 +150,9 @@ def setVoteData( row ):
 			candidates[id] = '|'.join([ party, last, name ]);
 			print 'Added %s candidate %s' %( party, name )
 		candidate = candidates[id]
-		votes = int(can[9])
+		votes = zint(can[9])
 		seats[seat]['votes'][id] = { 'id': id, 'votes': votes }
-		if can[10]: seats[seat]['final'] = id
+		if can[10] and not opt.zero: seats[seat]['final'] = id
 
 def percentage( n ):
 	pct = int( round( 100.0 * float(n) ) )
@@ -260,8 +265,11 @@ def update():
 	readVotes( 'US.txt' )
 	print 'Creating top of ticket votes JSON...'
 	makeJson( 'all' )
-	print 'Checking in votes JSON...'
-	os.system( 'svn ci -m "Vote update" %s' % jsonpath )
+	if opt.zero:
+		print 'Generated ZEROED data'
+	if opt.commit:
+		print 'Committing votes JSON...'
+		os.system( 'svn ci -m "Vote update" %s' % jsonpath )
 	print 'Done!'
 
 def main():
@@ -273,4 +281,16 @@ def main():
 if __name__ == "__main__":
 	datapath = './general-election-private/ap/2010/'
 	jsonpath = './general-election-data/json/votes/2010/'
+	
+	parser = OptionParser()
+	parser.add_option(
+		'-c', '--commit', action='store_true', dest='commit', default=False,
+		help='Commit changes'
+	)
+	parser.add_option(
+		'-z', '--zero', action='store_true', dest='zero', default=False,
+		help='Zero all data'
+	)
+	( opt, args ) = parser.parse_args()
+	
 	main()
