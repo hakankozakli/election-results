@@ -989,7 +989,6 @@ function showMap(state, reload, fetchPoly) {
   showHideBallotsLink(opt.state);
   isMapShown = true;
   $('#ballot-initiatives').text(strings.ballot);
-  $('#map').show();
   $('#stateInfoSelector').attr('disabled', false);
   $('#ballot-results').hide();
   $('#ballot-initiatives').unbind('click');
