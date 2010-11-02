@@ -943,7 +943,7 @@ function showIndividualBallotInfo(race, ballot, ballotObj, precincts, stateName)
         '<td>',
           race, '&nbsp;', ballot,
           ' - ', '<a href="', newsUrl, '?q=', stateName, '+', race, '+',
-          ballot.replace(/\s/g, '+').replace(/-/, ''),
+          ballot.replace(/-/g, ' ').replace(/\s+/g, '+'),
           '" target="_blank">', strings.newsLink, '</a>',
         '</td>',
         '<td width="50%">',
