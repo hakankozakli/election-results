@@ -18,6 +18,7 @@
 	scrolling="false">
 	
 	<Require feature="analytics"/>
+	<Require feature="setprefs"/>
 	<Locale messages="http://election-results.googlecode.com/svn/trunk/ALL_ALL.xml" />
 </ModulePrefs>
 
@@ -84,6 +85,7 @@
 </UserPref>
 
 <UserPref name="countdown" default_value="true" datatype="bool" display_name="Countdown"/>
+<UserPref name="isTesting" default_value="0" datatype="hidden"/>
 
 <Content type="html">
 <![CDATA[
@@ -95,8 +97,11 @@
 </script>
 
 <script type="text/javascript">
+	var prefs = new _IG_Prefs();
+	
 	GoogleElectionMapOptions = {
 		nocache: true,
+		isTesting: prefs.getInt('isTesting'),
 		_: null
 	};
 	
