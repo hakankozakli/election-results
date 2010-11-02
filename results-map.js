@@ -1221,6 +1221,8 @@ function showTip( place ) {
 function formatRace( place, race, count, index ) {
   var tally = race.votes
   var precincts = place.precincts;
+  var races = place.races;
+  var winner = place.candidates[ races && races[0] && races[0].final ];
   if( ! precincts )
     return opt.infoType == 'U.S. Senate' ? 'noSenate'.T() : '';
   var total = 0;
@@ -1231,7 +1233,9 @@ function formatRace( place, race, count, index ) {
     for( var i = -1, vote;  vote = tally[++i]; ) {
       var candidate = place.candidates[vote.id].split('|');
       var p = candidate[0];
-      if( p == 'Dem'  ||  p == 'GOP' )
+      if (winner == vote.id) {
+        tally1.splice(0, 1, vote);
+      } else if((p == 'Dem'  ||  p == 'GOP'))
         tally1.push( vote );
     }
     tally1.sort( function( a, b ) {
@@ -1239,8 +1243,6 @@ function formatRace( place, race, count, index ) {
     });
     tally = tally1;
   }
-  var races = place.races;
-  var winner = place.candidates[ races && races[0] && races[0].final ];
   return S(
     '<div>',
       '<table cellpadding="0" cellspacing="0">',
@@ -1249,11 +1251,11 @@ function formatRace( place, race, count, index ) {
           if( total && ! vote.votes ) return '';
           var candidate = place.candidates[vote.id].split('|');
           var party = parties[ candidate[0] ];
-          var common = 'padding-top:6px; white-space:nowrap;' + ( total && i == 0 ? 'font-weight:bold;' : '' ) + ( count > 1 ? 'font-size:80%;' : '' );
+          var common = 'padding-top:6px; white-space:nowrap;' + ( winner && i == 0 ? 'font-weight:bold;' : '' ) + ( count > 1 ? 'font-size:80%;' : '' );
           return S(
             '<tr>',
               '<td style="', common, 'padding-right:12px;">',
-                (winner && total && i == 0) ? '&#10004&nbsp;' : '&nbsp;&nbsp;&nbsp;&nbsp;',
+                (winner && i == 0) ? '&#10004&nbsp;' : '&nbsp;&nbsp;&nbsp;&nbsp;',
                 candidate[2], ' (', party && party.letter || candidate[0], ')',
               '</td>',
               unopposed ? S(
