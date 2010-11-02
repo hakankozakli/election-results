@@ -330,6 +330,7 @@ function stateByAbbr( abbr ) {
 
 document.write(
   '<style type="text/css">',
+    'a:active, a:visited, a:hover {color: #0000CC}',
     '.selects tr { vertical-align:middle; }',
     '.selects label { font-weight:bold; margin:0; }',
     '.selects .selectdiv { margin:0 0 4px 6px; }',
@@ -376,6 +377,7 @@ document.write(
     '.ballot-ind { backgroud-color: #eee }',
     '.state-ballot { font-weight: bold; margin-top: 3px; }',
     '.ballot-info { background-color: #eee; margin-bottom: 2px; padding: 3px;}',
+    '.ballot-info td, .ballot-info a { font-size: 11px; }',
     '#ballot-results { display:none; position:relative; width:99%; height:340px; overflow-y: auto; overflow-x: hidden;}',
     '.ballot-votes { border: 1px solid #000; height: 16px; margin: 0 2px;}',
     '.yes-votes { background-color: #00aa00; float:left;}',
@@ -478,23 +480,20 @@ document.write(
                     '</div>',
                   '</td>',
                 '</tr>',
-                   '<tr>',
-                  '<td colspan="2" style="padding-top:7px">',
-                    '<span class="seeAllLink" id="news-link">',
-                      'newsLink'.T(),
-                    '</span>&nbsp;&nbsp;&nbsp;',
-                    '<span class="seeAllLink" id="ballot-initiatives">',
-                    '</span>',
-                  '</td>',
-                  '<td>',
-                    '<div id="idTime" class="updatedTime" style="font-size:11px;">updated:</div>',
-                  '</td>',
-                '</tr>',
+                  '<tr>',
+                    '<td colspan="2" style="padding-top:7px">',
+                      '<span class="seeAllLink" id="news-link">',
+                        'newsLink'.T(),
+                      '</span>&nbsp;&nbsp;&nbsp;',
+                      '<span class="seeAllLink" id="ballot-initiatives">',
+                      '</span>',
+                    '</td>',
+                  '</tr>',
               '</table>',
             '</div>',
           '</div>',
         '</td>',
-        '<td style="width:', ww - sw, 'px;" class="rightpanel" style="background-color:#fff">',
+        '<td style="width:', ww - sw, 'px;" class="rightpanel">',
           '<div class="chart-container">',
             '<table cellpadding="0" cellspacing="0" width="100%">',
              '<tr>',
@@ -510,6 +509,11 @@ document.write(
               '<tr>',
                 '<td width="25px" style="font-weight:bold;">Senate</td>',
                 '<td><div id="content-senate" class="content"></div></td>',
+              '</tr>',
+              '<tr>',
+                '<td colspan="2" align="right">',
+                  '<div id="idTime" style="font-size:11px;">updated:</div>',
+                '</td>',
               '</tr>',
             '</table>',
           '</div>',
@@ -821,17 +825,17 @@ sm.insetY = sm.mapHeight - sm.insetHeight;
 var reloadTimer;
 
 function stateReady( state, reload ) {
- loadChart();
- $('#spinner').hide();
- $('#ballot-initiatives').text(strings.ballot);
- $('#ballot-initiatives').unbind('click');
- $('#ballot-initiatives').unbind('click');
- $('#ballot-initiatives').click(function() {
-   toggleBallotInitiatives(state, reload);
- });
- showingBallotInitiatives = !showingBallotInitiatives;
- toggleBallotInitiatives(state, reload);
- //reloadTimer = setTimeout( function() { loadState( true ); }, 300000 );
+  loadChart();
+  $('#spinner').hide();
+  $('#ballot-initiatives').text(strings.ballot);
+  $('#ballot-initiatives').unbind('click');
+  $('#ballot-initiatives').unbind('click');
+  $('#ballot-initiatives').click(function() {
+    toggleBallotInitiatives(state, reload);
+  });
+  showingBallotInitiatives = !showingBallotInitiatives;
+  toggleBallotInitiatives(state, reload);
+  //reloadTimer = setTimeout( function() { loadState( true ); }, 300000 );
 }
 function checkBallotsData() {
   state = curState.results.totals;
@@ -846,31 +850,50 @@ function checkBallotsData() {
 }
 
 function toggleBallotInitiatives(state, reload) {
- if (showingBallotInitiatives) {
-   // Hide ballot initiatives, show map.
-   $('#ballot-initiatives').text(strings.ballot);
-   $('#stateInfoSelector').attr('disabled', false);
-   $('#ballot-results').hide();
-   if (!reload) {
-     moveToState(state);
-   } else {
-     $('#ballot-initiatives').unbind('click');
-     $('#ballot-initiatives').click(function() {
-       toggleBallotInitiatives(state);
-     });
-   }
-   polys();
-   showingBallotInitiatives = false;
- } else {
-   updateBallotInfo(state);
-   $('#ballot-initiatives').text(strings.showMap);
-   $('#map').hide();
-   $('#staticmap').hide();
-   $('#stateInfoSelector').attr('disabled', true);
-   $('#ballot-results').show();
-   showingBallotInitiatives = true;
- }
+  if (showingBallotInitiatives) {
+    // Hide ballot initiatives, show map.
+    $('#ballot-initiatives').text(strings.ballot);
+    $('#stateInfoSelector').attr('disabled', false);
+    $('#ballot-results').hide();
+    if (!reload) {
+      moveToState(state);
+    } else {
+      $('#ballot-initiatives').unbind('click');
+      $('#ballot-initiatives').click(function() {
+        toggleBallotInitiatives(state);
+      });
+    }
+    polys();
+    showingBallotInitiatives = false;
+  } else {
+    updateBallotInfo(state);
+    $('#ballot-initiatives').text(strings.showMap);
+    $('#map').hide();
+    $('#staticmap').hide();
+    $('#stateInfoSelector').attr('disabled', true);
+    $('#ballot-results').show();
+    showingBallotInitiatives = true;
+  }
 }
+
+function updateBallotInfo(state) {
+  var locals = stateUS.results.locals;
+  var html = [];
+  if (opt.state != 'us') {
+    if (checkBallotsData()) {
+      html.push(showIndividualStateBallot(curState.results.totals));
+    } else {
+      html.push('<div class="no-data">', strings.noData, '</div>');
+    }
+  } else {
+    var stNames = sortStates(locals);
+    for (var i = 0; i < stNames.length; i++) {
+      html.push(showIndividualStateBallot(locals[stNames[i]]));
+    }
+  }
+  $('#ballot-results').html(html.join(''));
+}
+
 function sortStates(obj) {
   var keys = [];
   for (var key in obj) {
@@ -883,28 +906,10 @@ function sortByNames(state1, state2) {
   if (state1 > state2) {
     return 1;
   } else if (state1 < state2) {
-	return -1;
+    return -1;
   } else {
-	return 0;
+    return 0;
   }
-}
-
-function updateBallotInfo(state) {
-	 var locals = stateUS.results.locals;
-	 var html = [];
-	 if (opt.state != 'us') {
-	   if (checkBallotsData()) {
-	     html.push(showIndividualStateBallot(curState.results.totals));
-	   } else {
-	     html.push('<div class="no-data">', strings.noData, '</div>');
-	   }
-	 } else {
-	   var stNames = sortStates(locals);
-	   for (var i = 0; i < stNames.length; i++) {
-	     html.push(showIndividualStateBallot(locals[stNames[i]]));
-	   }
-	 }
-	 $('#ballot-results').html(html.join(''));
 }
 
 function showIndividualStateBallot(state) {
@@ -914,29 +919,32 @@ function showIndividualStateBallot(state) {
   for (var race in races) {
     if (race != 'U.S. House' && race != 'U.S. Senate' && race != 'Governor') {
       isBallot = true;
-      html.push(showIndividualRaceBallot(race, races[race], state.precincts));
+      html.push(showIndividualRaceBallot(race, races[race], state.precincts, state.name));
     }
   }
   return isBallot ? html.join('') : '';
 }
 
-function showIndividualRaceBallot(race, raceObj, precincts) {
+function showIndividualRaceBallot(race, raceObj, precincts, stateName) {
   var html = [];
   for (var ballot in raceObj) {
-    html.push(showIndividualBallotInfo(race, ballot, raceObj[ballot], precincts));
+    html.push(showIndividualBallotInfo(race, ballot, raceObj[ballot], precincts, stateName));
   }
   return html.join('');
 }
 
-function showIndividualBallotInfo(race, ballot, ballotObj, precincts) {
+function showIndividualBallotInfo(race, ballot, ballotObj, precincts, stateName) {
   var totalp = precincts.total;
   var reportingp = precincts.reporting;
   var percentage = Math.round((reportingp / totalp) * 100);
   var html = [
     '<table cellpadding="0" cellspacing="0" class="ballot-info" width=100%">',
       '<tr>',
-        '<td style="font-size: 11px;">',
+        '<td>',
           race, '&nbsp;', ballot,
+          ' - ', '<a href="', newsUrl, '?q=', stateName, '+', race, '+',
+          ballot.replace(/\s/g, '+').replace(/-/, ''),
+          '" target="_blank">', strings.newsLink, '</a>',
         '</td>',
         '<td width="50%">',
           getBallotVoteBar(ballotObj, precincts),
