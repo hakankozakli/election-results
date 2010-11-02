@@ -835,7 +835,7 @@ function stateReady( state, reload ) {
   });
   showingBallotInitiatives = !showingBallotInitiatives;
   toggleBallotInitiatives(state, reload);
-  //reloadTimer = setTimeout( function() { loadState( true ); }, 300000 );
+  reloadTimer = setTimeout( function() { loadState( true ); }, 305000 );
 }
 function checkBallotsData() {
   state = curState.results.totals;
