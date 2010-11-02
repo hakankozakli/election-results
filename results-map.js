@@ -57,7 +57,7 @@ var opt = window.GoogleElectionMapOptions || {};
 opt.static1 = ( ww == 573  &&  wh == 463 );
 opt.static = opt.static1  ||  ( ww == 620  &&  wh == 530 );
 opt.fontsize = '15px';
-var sw = opt.panelWidth = 180;
+var sw = opt.panelWidth = 237;
 
 opt.codeUrl = opt.codeUrl || 'http://election-results.googlecode.com/svn/trunk/';
 opt.imgUrl = opt.imgUrl || opt.codeUrl + 'images/';
@@ -338,7 +338,7 @@ document.write(
     '* { font-family: Arial,sans-serif; font-size: ', opt.fontsize, '; }',
     '#outer {}',
       opt.tpm ? '.fullpanel { background-color:#CCC7AA; }' : '.fullpanel { background-color:#EEE; }',
-    '#stateSelector, #stateInfoSelector { width:', sw, 'px; }',
+    '#stateSelector, #stateInfoSelector { width:180px; }',
     '.barvote { font-weight:bold; color:white; }',
     '.nuetral { font-weight:bold; color:#000; }',
     'h2 { font-size:11pt; margin:0; padding:0; }',
@@ -371,7 +371,7 @@ document.write(
     '#error { z-index:999999; position:absolute; left:4px; bottom:4px; border:1px solid #888; background-color:#FFCCCC; font-weight:bold; padding:6px; }',
     '.seeAllLink { color:#00c; cursor:pointer; text-decoration:underline; }',
     '.newsLink { color:#00c; cursor:pointer; float:right; font-size:12px; line-height:22px; text-decoration:underline; }',
-    '.chart-container { margin: 0pt; padding: 8px 8px 8px 0; font-size:12px; }',
+    '.chart-container { margin: 0pt; padding-top: 8px; font-size:12px; }',
     '.chart-container td, .chart-container div { font-size:12px; }',
     '.ballotInitiatives { display: none; }',
     '.ballot-ind { backgroud-color: #eee }',
@@ -379,7 +379,7 @@ document.write(
     '.ballot-info { background-color: #eee; margin-bottom: 2px; padding: 3px;}',
     '.ballot-info td, .ballot-info a { font-size: 11px; }',
     '#ballot-results { display:none; position:relative; width:99%; height:340px; overflow-y: auto; overflow-x: hidden;}',
-    '.ballot-votes { border: 1px solid #000; height: 16px; margin: 0 2px;}',
+    '.ballot-votes { border: 1px solid #000; height: 16px; margin: 0 2px; font-size: 10px; }',
     '.yes-votes { background-color: #00aa00; float:left;}',
     '.no-votes { background-color: #cc0000; float:right;}',
     '.ballot-votes-bar td { font-size: 11px; }',
@@ -480,22 +480,22 @@ document.write(
                     '</div>',
                   '</td>',
                 '</tr>',
-                  '<tr>',
-                    '<td colspan="2" style="padding-top:7px">',
-                      '<span class="seeAllLink" id="news-link">',
-                        'newsLink'.T(),
-                      '</span>&nbsp;&nbsp;&nbsp;',
-                      '<span class="seeAllLink" id="ballot-initiatives">',
-                      '</span>',
-                    '</td>',
-                  '</tr>',
+                '<tr>',
+                  '<td colspan="2" style="padding-top:7px">',
+                    '<span class="seeAllLink" id="news-link">',
+                      'newsLink'.T(),
+                    '</span>&nbsp;&nbsp;&nbsp;',
+                    '<span class="seeAllLink" id="ballot-initiatives">',
+                    '</span>',
+                  '</td>',
+                '</tr>',
               '</table>',
             '</div>',
           '</div>',
         '</td>',
         '<td style="width:', ww - sw, 'px;" class="rightpanel">',
           '<div class="chart-container">',
-            '<table cellpadding="0" cellspacing="0" width="100%">',
+            '<table cellpadding="0" cellspacing="0" width="98%">',
              '<tr>',
                 '<td width="25px"></td>',
                 '<td style="font-weight:bold;margin-top: 10px;">',
@@ -986,7 +986,7 @@ function getBallotVoteBar(ballotObj, precincts) {
           '<div class="ballot-votes">',
             '<span style="width:', yesPercentage, '%" class="yes-votes">', yesText, '</span>',
             '<span style="width:', noPercentage, '%"  class="no-votes">', noText, '</span>',
-          '&nbsp;</div>',
+          '</div>',
         '</td>',
         '<td width="32px" align="left">',
           'No<br>', Math.round(noPercentage * 10) / 10, '%',
@@ -1199,6 +1199,7 @@ function getSeats( race, seat ) {
   if( race['NV'] ) return [ race['NV'] ];
   if( race['2006'] && race['2008'] ) return [ race['2006'], race['2008'] ];
   if( race['2010']) return [ race['2010']];
+  if( race['Full Term']) return [ race['Full Term'], race['Unexpired Term'] ];
   return null;
 }
 
