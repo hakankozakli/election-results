@@ -111,15 +111,16 @@
       return;
     }
     document.write(
-	  '<script type="text/javascript" src="',
-	    _IG_GetCachedUrl( url, { refreshInterval:seconds } ),
-        '">',
+	  '<script type="text/javascript" src="', url, '">',
 	  '<\/script>'
 		);
 	}
 
-	script( 'http://election-results.googlecode.com/svn/trunk/polygonzo.js', 3600 );
-	script( 'http://election-results.googlecode.com/svn/trunk/results-map.js' + '?' + Math.floor( +new Date / 180 / 1000 ), 180 );
+	script( 'http://election-results.googlecode.com/svn/trunk/polygonzo.js' );
+	script(
+		'http://election-results.googlecode.com/svn/trunk/results-map.js?' +
+		Math.floor( +new Date / 180 / 1000 )
+	);
 </script>
 
 ]]>
