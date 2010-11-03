@@ -53,6 +53,9 @@ def json( obj ):
 		json = sj.dumps( obj, separators=( ',', ':' ) )
 	return json
 
+def jsonp( json ):
+	return 'votesReady( ' + json + ')'
+
 def getPrecincts( row ):
 	#print 'getPrecincts %s %s %s %s' %( row[0], row[1], row[2], row[3] )
 	return {
@@ -215,16 +218,16 @@ def makeJson( type ):
 		now_utc = datetime.now(timezone('UTC'))
 		now_eastern = now_utc.astimezone(timezone('US/Eastern'))
 		if type == 'all':
-			writeFile(
-				'%s%s-%s.json' %( jsonpath, state['abbr'].lower(), type ),
-				json({
-					'state': state['abbr'],
+			j = json({
+				'state': state['abbr'],
 				'candidates': cands,
-					'total': statetotal,
-					'totals': state,
-					'locals': countyvotes,
-			'dttime': now_eastern.strftime(fmt)
-				}) )
+				'total': statetotal,
+				'totals': state,
+				'locals': countyvotes,
+				'dttime': now_eastern.strftime(fmt)
+			})
+			writeFile( '%s%s-%s.json' %( jsonpath, state['abbr'].lower(), type ), j )
+			writeFile( '%s%s-%s.js' %( jsonpath, state['abbr'].lower(), type ), jsonp(j) )
 	sortVotes( usall )
 	#setPins( statevotes )
 	j = {
@@ -237,10 +240,9 @@ def makeJson( type ):
 	}
 	if type == 'all':
 		j['trends'] = trends
-	writeFile(
-		'%s%s-%s.json' %( jsonpath, 'us', type ),
-		json( j )
-	)
+	j = json( j )
+	writeFile( '%s%s-%s.json' %( jsonpath, 'us', type ), j )
+	writeFile( '%s%s-%s.js' %( jsonpath, 'us', type ), jsonp(j) )
 	#print '%s of %s precincts reporting' %( state['precincts']['reporting'], state['precincts']['total'] )
 	#print '%s leaders:' % party
 	#for leader in leaders.iterkeys():
