@@ -1537,13 +1537,14 @@ function getShapes( state, callback ) {
 }
 
 function getResults( state, callback ) {
-	getJSON( 'votes', opt.voteUrl2010, state.abbr.toLowerCase() + '-all.json', 300, function( results ) {
+  votesReady = function( results ) {
     state.results = results;
     var lastUpdatedTime = results.dttime;
     var dtElement = document.getElementById('idTime');
     dtElement.innerHTML = 'Updated: ' + lastUpdatedTime+ ' ET';
     callback();
-  });
+  };
+  $.getScript( S( opt.voteUrl2010, state.abbr.toLowerCase(), '-all.js?', ( +new Date / 60 / 1000 ) ) );
 }
 
 function objToSortedKeys( obj ) {
