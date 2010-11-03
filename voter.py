@@ -226,7 +226,6 @@ def makeJson( type ):
 				'locals': countyvotes,
 				'dttime': now_eastern.strftime(fmt)
 			})
-			writeFile( '%s%s-%s.json' %( jsonpath, state['abbr'].lower(), type ), j )
 			writeFile( '%s%s-%s.js' %( jsonpath, state['abbr'].lower(), type ), jsonp(j) )
 	sortVotes( usall )
 	#setPins( statevotes )
@@ -241,7 +240,6 @@ def makeJson( type ):
 	if type == 'all':
 		j['trends'] = trends
 	j = json( j )
-	writeFile( '%s%s-%s.json' %( jsonpath, 'us', type ), j )
 	writeFile( '%s%s-%s.js' %( jsonpath, 'us', type ), jsonp(j) )
 	#print '%s of %s precincts reporting' %( state['precincts']['reporting'], state['precincts']['total'] )
 	#print '%s leaders:' % party
