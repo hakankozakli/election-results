@@ -1568,7 +1568,7 @@ function voteBar( a, left, center, right, others ) {
 
   function bar( who, side ) {
     var w = ((a.width / a.total) * ( who.votes )) - .5;
-    if (w == 0)
+    if (w <= 0)
       return;
     if (side == 'left')
       leftWidth = w;
