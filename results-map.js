@@ -1329,7 +1329,7 @@ function formatTip( place ) {
                 'stateDistrict'.T({ state:stateByAbbr(place.state).name, number:place.name }),
                 ' ',
               '</span>',
-              opt.infoType == 'Governor' && place.type == 'state' ? 'EVs'.T({ votes:place.electoral || place.state == 'ak' && 3 }) : '',
+             // opt.infoType == 'Governor' && place.type == 'state' ? 'EVs'.T({ votes:place.electoral || place.state == 'ak' && 3 }) : '',
             '</div>',
           '</td>',
         '</tr>',
